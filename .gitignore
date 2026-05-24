@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables - NEVER commit these
+.env
+server/.env
+client/.env
+
+# Uploaded files
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+
+# OS / editor files
+.DS_Store
+.vscode/
