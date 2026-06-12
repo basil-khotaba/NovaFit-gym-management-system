@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
     api
       .get('/auth/me')
       .then((res) => {
-        if (isMounted) setUser(res.data.data);
+        if (isMounted) setUser(res.data.user);
       })
       .catch(() => {
         localStorage.removeItem('token');
@@ -47,8 +47,12 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((userData) => {
+    setUser(userData);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

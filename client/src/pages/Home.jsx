@@ -4,6 +4,7 @@ import api from '../services/api';
 import ClassCard from '../components/ClassCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
+import HeroAnimation from '../components/HeroAnimation';
 
 /**
  * Home — the landing page.
@@ -11,15 +12,18 @@ import ErrorMessage from '../components/ErrorMessage';
  */
 function Home() {
   const [classes, setClasses] = useState([]);
+  const [stats, setStats] = useState({ members: null, trainers: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchClasses = () => {
     setLoading(true);
     setError(null);
-    api
-      .get('/classes')
-      .then((res) => setClasses(res.data.data))
+    Promise.all([api.get('/classes'), api.get('/stats')])
+      .then(([cls, st]) => {
+        setClasses(cls.data.data);
+        setStats(st.data.data);
+      })
       .catch((err) =>
         setError(err.response?.data?.message || 'Could not load classes')
       )
@@ -27,7 +31,15 @@ function Home() {
   };
 
   useEffect(() => {
-    fetchClasses();
+    Promise.all([api.get('/classes'), api.get('/stats')])
+      .then(([cls, st]) => {
+        setClasses(cls.data.data);
+        setStats(st.data.data);
+      })
+      .catch((err) =>
+        setError(err.response?.data?.message || 'Could not load classes')
+      )
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -35,6 +47,9 @@ function Home() {
       {/* --- Hero section --- */}
       <section className="hero">
         <div className="hero-accent"></div>
+        <div className="hero-figure">
+          <HeroAnimation />
+        </div>
         <span className="hero-tag">New — Group classes added</span>
         <h1>
           Train harder.<br />
@@ -46,24 +61,24 @@ function Home() {
           trainers — all in one place.
         </p>
         <div className="hero-actions">
-          <Link to="/classes" className="btn-primary" style={{ padding: '10px 22px' }}>
+          <Link to="/classes" className="btn-primary" style={{ padding: '14px 32px', fontSize: '16px' }}>
             Browse classes
           </Link>
-          <Link to="/trainers" className="btn-ghost" style={{ padding: '10px 18px' }}>
+          <Link to="/trainers" className="btn-ghost" style={{ padding: '14px 28px', fontSize: '16px' }}>
             Meet trainers
           </Link>
         </div>
         <div className="hero-stats">
           <div>
-            <div className="stat-num">{classes.length}</div>
+            <div className="stat-num">{stats.classes ?? classes.length}</div>
             <div className="stat-label">Classes available</div>
           </div>
           <div>
-            <div className="stat-num">12</div>
+            <div className="stat-num">{stats.trainers ?? '—'}</div>
             <div className="stat-label">Expert trainers</div>
           </div>
           <div>
-            <div className="stat-num">2,400+</div>
+            <div className="stat-num">{stats.members ?? '—'}</div>
             <div className="stat-label">Active members</div>
           </div>
         </div>

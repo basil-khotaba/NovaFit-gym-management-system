@@ -80,14 +80,23 @@ exports.login = async (req, res, next) => {
 
     const token = generateToken(user);
 
+    // Re-fetch the user with membership+plan populated so the
+    // plan badge shows immediately after login without a page reload.
+    const fullUser = await User.findById(user._id).populate({
+      path: 'membership',
+      populate: { path: 'plan' },
+    });
+
     res.status(200).json({
       success: true,
       token,
       user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        _id: fullUser._id,
+        name: fullUser.name,
+        email: fullUser.email,
+        role: fullUser.role,
+        membership: fullUser.membership,
+        profileImage: fullUser.profileImage,
       },
     });
   } catch (error) {
@@ -107,7 +116,10 @@ exports.login = async (req, res, next) => {
  */
 exports.getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).populate({
+      path: 'membership',
+      populate: { path: 'plan' },
+    });
     if (!user) {
       return next(new AppError('User not found', 404));
     }
@@ -201,7 +213,8 @@ exports.selectPlan = async (req, res, next) => {
     user.membership = membership._id;
     await user.save();
 
-    res.status(200).json({ success: true, data: membership });
+    const populated = await membership.populate('plan');
+    res.status(200).json({ success: true, data: populated, planName: plan.name });
   } catch (error) {
     next(error);
   }

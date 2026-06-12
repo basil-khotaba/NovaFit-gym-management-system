@@ -31,7 +31,12 @@ function Navbar() {
       <div className="nav-right">
         {user ? (
           <>
-            <span className="nav-user">Hi, {user.name}</span>
+            <span className="nav-user">
+              Hi, {user.name}
+              {user.membership?.plan?.name && (
+                <span className="nav-plan-badge">{user.membership.plan.name}</span>
+              )}
+            </span>
             <button className="btn-ghost" onClick={handleLogout}>
               Logout
             </button>

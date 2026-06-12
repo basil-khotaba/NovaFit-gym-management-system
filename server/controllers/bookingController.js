@@ -44,7 +44,11 @@ exports.getAllBookings = async (req, res, next) => {
   try {
     const bookings = await Booking.find()
       .sort({ createdAt: -1 })
-      .populate('user', 'name email')
+      .populate({
+        path: 'user',
+        select: 'name email membership',
+        populate: { path: 'membership', populate: { path: 'plan', select: 'name' } },
+      })
       .populate('class', 'name category schedule');
 
     res.status(200).json({
@@ -71,6 +75,37 @@ exports.createBooking = async (req, res, next) => {
     const gymClass = await Class.findById(classId);
     if (!gymClass) {
       return next(new AppError('No class found with that id', 404));
+    }
+
+    // 1b. Check the user's plan class limit for this month.
+    const User = require('../models/User');
+    const userDoc = await User.findById(userId).populate({
+      path: 'membership',
+      populate: { path: 'plan', select: 'name classLimit' },
+    });
+
+    const plan = userDoc?.membership?.plan;
+    if (!plan) {
+      return next(new AppError('You need an active membership plan to book classes. Visit the Memberships page to get started.', 403));
+    }
+
+    if (plan.classLimit !== null && plan.classLimit !== undefined) {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const bookedThisMonth = await Booking.countDocuments({
+        user: userId,
+        status: 'confirmed',
+        createdAt: { $gte: startOfMonth },
+      });
+
+      if (bookedThisMonth >= plan.classLimit) {
+        return next(new AppError(
+          `You've reached your ${plan.name} plan limit of ${plan.classLimit} classes this month. Upgrade your plan for more classes.`,
+          403
+        ));
+      }
     }
 
     // 2. Count how many confirmed bookings the class already has.

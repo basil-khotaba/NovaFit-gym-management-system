@@ -10,6 +10,9 @@ client/.env
 server/uploads/*
 !server/uploads/.gitkeep
 
+# Source image assets at repo root (large files — images are seeded via script in production)
+/assets/
+
 # Build output
 dist/
 build/

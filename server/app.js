@@ -10,6 +10,15 @@ const globalErrorHandler = require('./middleware/errorHandler');
 const AppError = require('./utils/AppError');
 const { apiLimiter, authLimiter } = require('./middleware/rateLimiter');
 
+// Pre-load all models so Mongoose populate() can find their schemas.
+require('./models/User');
+require('./models/Plan');
+require('./models/Membership');
+require('./models/Trainer');
+require('./models/Class');
+require('./models/Booking');
+require('./models/Review');
+
 // Route files
 const authRoutes = require('./routes/authRoutes');
 const trainerRoutes = require('./routes/trainerRoutes');
@@ -25,12 +34,18 @@ const app = express();
  * ------------------------------------------------------------------ */
 
 // Security HTTP headers (XSS, clickjacking, MIME sniffing protection).
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // Allow the React frontend to call this API.
+// In development, accept any localhost port so Vite's auto-port works.
+const corsOrigin =
+  process.env.NODE_ENV === 'development'
+    ? /^http:\/\/localhost(:\d+)?$/
+    : process.env.CLIENT_URL;
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: corsOrigin,
     credentials: true,
   })
 );
@@ -54,6 +69,23 @@ app.use('/api', apiLimiter);
 // Simple health-check route - confirms the server is alive.
 app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'NovaFit API is running' });
+});
+
+// Public stats — member count, trainer count, class count.
+app.get('/api/stats', async (req, res) => {
+  try {
+    const User    = require('./models/User');
+    const Trainer = require('./models/Trainer');
+    const Class   = require('./models/Class');
+    const [members, trainers, classes] = await Promise.all([
+      User.countDocuments({ role: 'member' }),
+      Trainer.countDocuments(),
+      Class.countDocuments(),
+    ]);
+    res.json({ success: true, data: { members, trainers, classes } });
+  } catch (e) {
+    res.status(500).json({ success: false });
+  }
 });
 
 // The strict authLimiter is applied to login/register to slow brute-force.

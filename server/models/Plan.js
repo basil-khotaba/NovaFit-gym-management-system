@@ -37,6 +37,12 @@ const planSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    // Max classes a member can book per month. null = unlimited.
+    classLimit: {
+      type: Number,
+      default: null,
+    },
   },
   {
     // Automatically adds two date fields to every document:
