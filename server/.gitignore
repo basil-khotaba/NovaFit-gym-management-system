@@ -2,5 +2,7 @@ node_modules/
 .env
 uploads/*
 !uploads/.gitkeep
+!uploads/trainer-*.png
+!uploads/class-*.png
 *.log
 .DS_Store

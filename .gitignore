@@ -6,9 +6,13 @@ node_modules/
 server/.env
 client/.env
 
-# Uploaded files
+# Uploaded files — runtime user uploads are ignored, but the seed
+# images (trainer-*.png, class-*.png) are committed so a fresh
+# deployment has the same images the seed scripts reference.
 server/uploads/*
 !server/uploads/.gitkeep
+!server/uploads/trainer-*.png
+!server/uploads/class-*.png
 
 # Source image assets at repo root (large files — images are seeded via script in production)
 /assets/
