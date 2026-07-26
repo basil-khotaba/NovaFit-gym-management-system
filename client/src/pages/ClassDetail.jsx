@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import api from '../services/api';
+import { createBooking } from '../store/bookingsSlice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 function ClassDetail() {
   const { id } = useParams();
   const { user } = useAuth();
+  const dispatch = useDispatch();
   const [gymClass, setGymClass] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,12 +34,12 @@ function ClassDetail() {
     setBookingLoading(true);
     setBookingMsg(null);
     try {
-      await api.post('/bookings', { class: id });
+      await dispatch(createBooking(id)).unwrap();
       setBookingMsg({ type: 'success', text: 'Class booked! Check My Bookings.' });
-    } catch (err) {
+    } catch (message) {
       setBookingMsg({
         type: 'error',
-        text: err.response?.data?.message || 'Booking failed.',
+        text: message || 'Booking failed.',
       });
     } finally {
       setBookingLoading(false);

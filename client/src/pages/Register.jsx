@@ -1,31 +1,35 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState(null);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm({ mode: 'onBlur' });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+  const onSubmit = async (data) => {
+    setServerError(null);
     try {
-      const res = await api.post('/auth/register', form);
+      const res = await api.post('/auth/register', {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
       login(res.data.user, res.data.token);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
+      setServerError(
+        err.response?.data?.message || 'Registration failed. Please try again.'
+      );
     }
   };
 
@@ -36,48 +40,75 @@ function Register() {
         <h1 className="auth-title">Create account</h1>
         <p className="auth-sub">Start your fitness journey today</p>
 
-        {error && <div className="auth-error">{error}</div>}
+        {serverError && <div className="auth-error">{serverError}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
           <div className="form-group">
             <label>Name</label>
             <input
               type="text"
-              name="name"
               placeholder="Your full name"
-              value={form.name}
-              onChange={handleChange}
-              required
               autoComplete="name"
+              {...register('name', {
+                required: 'Name is required',
+                minLength: { value: 2, message: 'Name must be at least 2 characters' },
+              })}
             />
+            {errors.name && <p className="field-error">{errors.name.message}</p>}
           </div>
+
           <div className="form-group">
             <label>Email</label>
             <input
               type="email"
-              name="email"
               placeholder="you@email.com"
-              value={form.email}
-              onChange={handleChange}
-              required
               autoComplete="email"
+              {...register('email', {
+                required: 'Email is required',
+                pattern: {
+                  value: /^\S+@\S+\.\S+$/,
+                  message: 'Please enter a valid email address',
+                },
+              })}
             />
+            {errors.email && <p className="field-error">{errors.email.message}</p>}
           </div>
+
           <div className="form-group">
             <label>Password</label>
             <input
               type="password"
-              name="password"
               placeholder="Minimum 6 characters"
-              value={form.password}
-              onChange={handleChange}
-              required
-              minLength={6}
               autoComplete="new-password"
+              {...register('password', {
+                required: 'Password is required',
+                minLength: { value: 6, message: 'Password must be at least 6 characters' },
+              })}
             />
+            {errors.password && (
+              <p className="field-error">{errors.password.message}</p>
+            )}
           </div>
-          <button type="submit" className="btn-primary auth-btn" disabled={loading}>
-            {loading ? 'Creating account...' : 'Create account'}
+
+          <div className="form-group">
+            <label>Confirm password</label>
+            <input
+              type="password"
+              placeholder="Re-enter your password"
+              autoComplete="new-password"
+              {...register('confirmPassword', {
+                required: 'Please confirm your password',
+                validate: (value) =>
+                  value === getValues('password') || 'Passwords do not match',
+              })}
+            />
+            {errors.confirmPassword && (
+              <p className="field-error">{errors.confirmPassword.message}</p>
+            )}
+          </div>
+
+          <button type="submit" className="btn-primary auth-btn" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 

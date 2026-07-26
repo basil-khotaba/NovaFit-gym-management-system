@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchMyBookings, cancelBooking } from '../store/bookingsSlice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 
@@ -45,48 +46,24 @@ function BookingRow({ booking, onCancel, cancelling, cancelled }) {
 }
 
 function MyBookings() {
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [cancellingId, setCancellingId] = useState(null);
+  const dispatch = useDispatch();
+  const { items: bookings, status, error, cancellingId } = useSelector(
+    (state) => state.bookings
+  );
+  const loading = status === 'loading' || status === 'idle';
 
-  // loading starts true; setState only inside async callbacks.
   useEffect(() => {
-    api
-      .get('/bookings/my')
-      .then((res) => setBookings(res.data.data))
-      .catch((err) =>
-        setError(err.response?.data?.message || 'Could not load bookings')
-      )
-      .finally(() => setLoading(false));
-  }, []);
+    dispatch(fetchMyBookings());
+  }, [dispatch]);
 
   const handleRetry = () => {
-    setLoading(true);
-    setError(null);
-    api
-      .get('/bookings/my')
-      .then((res) => setBookings(res.data.data))
-      .catch((err) =>
-        setError(err.response?.data?.message || 'Could not load bookings')
-      )
-      .finally(() => setLoading(false));
+    dispatch(fetchMyBookings());
   };
 
-  const handleCancel = async (bookingId) => {
-    setCancellingId(bookingId);
-    try {
-      await api.patch(`/bookings/${bookingId}/cancel`);
-      setBookings((prev) =>
-        prev.map((b) =>
-          b._id === bookingId ? { ...b, status: 'cancelled' } : b
-        )
-      );
-    } catch (err) {
-      alert(err.response?.data?.message || 'Could not cancel booking.');
-    } finally {
-      setCancellingId(null);
-    }
+  const handleCancel = (bookingId) => {
+    dispatch(cancelBooking(bookingId)).unwrap().catch((message) => {
+      alert(message || 'Could not cancel booking.');
+    });
   };
 
   const active = bookings.filter((b) => b.status === 'confirmed');

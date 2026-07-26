@@ -1,31 +1,28 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState(null);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({ mode: 'onBlur' });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+  const onSubmit = async (data) => {
+    setServerError(null);
     try {
-      const res = await api.post('/auth/login', form);
+      const res = await api.post('/auth/login', data);
       login(res.data.user, res.data.token);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
+      setServerError(err.response?.data?.message || 'Login failed. Please try again.');
     }
   };
 
@@ -36,35 +33,41 @@ function Login() {
         <h1 className="auth-title">Welcome back</h1>
         <p className="auth-sub">Sign in to your account</p>
 
-        {error && <div className="auth-error">{error}</div>}
+        {serverError && <div className="auth-error">{serverError}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
           <div className="form-group">
             <label>Email</label>
             <input
               type="email"
-              name="email"
               placeholder="you@email.com"
-              value={form.email}
-              onChange={handleChange}
-              required
               autoComplete="email"
+              {...register('email', {
+                required: 'Email is required',
+                pattern: {
+                  value: /^\S+@\S+\.\S+$/,
+                  message: 'Please enter a valid email address',
+                },
+              })}
             />
+            {errors.email && <p className="field-error">{errors.email.message}</p>}
           </div>
+
           <div className="form-group">
             <label>Password</label>
             <input
               type="password"
-              name="password"
               placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              required
               autoComplete="current-password"
+              {...register('password', { required: 'Password is required' })}
             />
+            {errors.password && (
+              <p className="field-error">{errors.password.message}</p>
+            )}
           </div>
-          <button type="submit" className="btn-primary auth-btn" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign in'}
+
+          <button type="submit" className="btn-primary auth-btn" disabled={isSubmitting}>
+            {isSubmitting ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
