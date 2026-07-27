@@ -16,6 +16,8 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // fetchClasses is used as the "Try Again" retry handler passed to
+  // ErrorMessage — it explicitly resets loading/error before refetching.
   const fetchClasses = () => {
     setLoading(true);
     setError(null);
@@ -30,6 +32,8 @@ function Home() {
       .finally(() => setLoading(false));
   };
 
+  // Initial load on mount. loading already starts true, so this doesn't
+  // need to set it again — only the async callbacks touch state here.
   useEffect(() => {
     Promise.all([api.get('/classes'), api.get('/stats')])
       .then(([cls, st]) => {
@@ -69,6 +73,8 @@ function Home() {
           </Link>
         </div>
         <div className="hero-stats">
+          {/* Prefer the live /stats count; fall back to the fetched list
+              length so something reasonable shows before /stats resolves */}
           <div>
             <div className="stat-num">{stats.classes ?? classes.length}</div>
             <div className="stat-label">Classes available</div>

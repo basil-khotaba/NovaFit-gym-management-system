@@ -1,10 +1,16 @@
 const Joi = require('joi');
 
+/**
+ * JOI validation schemas for trainer review requests.
+ */
+
+// MongoDB ObjectId used to reference the trainer being reviewed.
 const objectId = Joi.string().hex().length(24).messages({
   'string.hex': 'Trainer id must be a valid id',
   'string.length': 'Trainer id must be a valid id',
 });
 
+// Rules for POST /api/reviews - trainer id and rating are required.
 const createReviewSchema = Joi.object({
   trainer: objectId.required().messages({
     'any.required': 'A trainer id is required',
@@ -20,6 +26,7 @@ const createReviewSchema = Joi.object({
   }),
 });
 
+// Rules for PUT/PATCH /api/reviews/:id - rating/comment optional, but at least one required.
 const updateReviewSchema = Joi.object({
   rating: Joi.number().integer().min(1).max(5),
   comment: Joi.string().max(500).allow(''),

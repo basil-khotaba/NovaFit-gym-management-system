@@ -6,7 +6,10 @@ import { Link } from 'react-router-dom';
  * Wrapped in React.memo for performance (rubric requirement).
  */
 function ClassCard({ gymClass }) {
+  // Images are served from the API's origin (not the /api path), so strip
+  // the '/api' suffix off the configured API URL to get the file host.
   const API_ORIGIN = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+  // Used as a CSS class so each category gets its own accent color.
   const categoryClass = `cat-${(gymClass.category || '').toLowerCase()}`;
 
   return (
@@ -16,6 +19,8 @@ function ClassCard({ gymClass }) {
           <img
             src={`${API_ORIGIN}${gymClass.image}`}
             alt={gymClass.name}
+            // If the image fails to load, hide it instead of showing a
+            // broken-image icon — the colored background still shows.
             onError={(e) => { e.target.style.display = 'none'; }}
           />
         ) : (

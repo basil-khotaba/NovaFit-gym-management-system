@@ -20,12 +20,21 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ClassForm = lazy(() => import('./pages/ClassForm'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+/**
+ * App — top-level route table.
+ *
+ * Navbar is rendered outside <Routes> so it stays mounted on every page.
+ * Suspense wraps the routes because each page above is a lazy import —
+ * without it, React would throw instead of showing a loading state while
+ * a page chunk downloads.
+ */
 function App() {
   return (
     <>
       <Navbar />
       <Suspense fallback={<LoadingSpinner message="Loading page..." />}>
         <Routes>
+          {/* Public routes — no auth required */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -33,6 +42,8 @@ function App() {
           <Route path="/classes/:id" element={<ClassDetail />} />
           <Route path="/trainers" element={<Trainers />} />
           <Route path="/memberships" element={<Memberships />} />
+
+          {/* Member-only: PrivateRoute redirects to /login if not signed in */}
           <Route
             path="/my-bookings"
             element={
@@ -41,6 +52,8 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          {/* Admin-only routes: AdminRoute redirects non-admins away */}
           <Route
             path="/admin"
             element={
@@ -65,6 +78,8 @@ function App() {
               </AdminRoute>
             }
           />
+
+          {/* Catch-all: anything that matches no route above */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

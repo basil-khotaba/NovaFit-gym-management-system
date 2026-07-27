@@ -2,6 +2,12 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Plan = require('../models/Plan');
 
+/**
+ * One-off maintenance script: backfills the classLimit field on
+ * existing plans (matched by name, case-insensitive) for deployments
+ * seeded before classLimit was added to the Plan model.
+ * Run manually with: node scripts/updatePlanLimits.js
+ */
 async function updateLimits() {
   await mongoose.connect(process.env.MONGO_URI);
 

@@ -24,6 +24,7 @@ function Navbar() {
         <Link to="/classes">Classes</Link>
         <Link to="/trainers">Trainers</Link>
         <Link to="/memberships">Memberships</Link>
+        {/* Only shown once logged in / for admins — mirrors the route guards in App.jsx */}
         {user && <Link to="/my-bookings">My Bookings</Link>}
         {user?.role === 'admin' && <Link to="/admin">Admin</Link>}
       </div>
@@ -33,6 +34,7 @@ function Navbar() {
           <>
             <span className="nav-user">
               Hi, {user.name}
+              {/* Badge only appears once the user has picked a membership plan */}
               {user.membership?.plan?.name && (
                 <span className="nav-plan-badge">{user.membership.plan.name}</span>
               )}

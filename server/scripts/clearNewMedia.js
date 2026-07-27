@@ -3,6 +3,12 @@ const mongoose = require('mongoose');
 const Trainer = require('../models/Trainer');
 const Class = require('../models/Class');
 
+/**
+ * One-off maintenance script: the reverse of assignNewMedia.js.
+ * Clears the photo/image fields on the listed trainers and classes,
+ * useful for re-testing the media assignment flow from a clean state.
+ * Run manually with: node scripts/clearNewMedia.js
+ */
 async function run() {
   await mongoose.connect(process.env.MONGO_URI);
 

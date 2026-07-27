@@ -1,5 +1,10 @@
 const Joi = require('joi');
 
+/**
+ * JOI validation schemas for trainer requests.
+ */
+
+// Rules for POST /api/trainers - only name is required to create a trainer.
 const createTrainerSchema = Joi.object({
   name: Joi.string().min(2).max(50).required().messages({
     'string.empty': 'Trainer name is required',
@@ -16,6 +21,7 @@ const createTrainerSchema = Joi.object({
   photo: Joi.string().allow('').optional(),
 });
 
+// Rules for PUT/PATCH /api/trainers/:id - all fields optional, but at least one required.
 const updateTrainerSchema = Joi.object({
   name: Joi.string().min(2).max(50),
   bio: Joi.string().max(500).allow(''),

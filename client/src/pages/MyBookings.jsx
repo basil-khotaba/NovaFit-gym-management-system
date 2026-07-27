@@ -5,8 +5,14 @@ import { fetchMyBookings, cancelBooking } from '../store/bookingsSlice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 
+// Presentational row for one booking. onCancel/cancelling are omitted for
+// already-cancelled bookings (see the render below), so this component
+// treats them as optional.
 function BookingRow({ booking, onCancel, cancelling, cancelled }) {
   const cls = booking.class;
+  // Defensive guard: if the class was deleted after the booking was made,
+  // booking.class may come back null/unpopulated — skip rendering it
+  // rather than crashing on cls.category etc.
   if (!cls) return null;
   const category = (cls.category || '').toLowerCase();
 
@@ -45,11 +51,21 @@ function BookingRow({ booking, onCancel, cancelling, cancelled }) {
   );
 }
 
+/**
+ * MyBookings — the logged-in member's bookings, split into upcoming and
+ * cancelled sections.
+ *
+ * Reads from and dispatches to the Redux bookings slice instead of
+ * fetching locally, so a booking made on ClassDetail shows up here
+ * without this page needing to know that ClassDetail exists.
+ */
 function MyBookings() {
   const dispatch = useDispatch();
   const { items: bookings, status, error, cancellingId } = useSelector(
     (state) => state.bookings
   );
+  // 'idle' counts as loading too — it's the state before the first fetch
+  // has even started, so we don't want to render an empty-state flash.
   const loading = status === 'loading' || status === 'idle';
 
   useEffect(() => {
@@ -61,6 +77,8 @@ function MyBookings() {
   };
 
   const handleCancel = (bookingId) => {
+    // .unwrap() rethrows the rejection so we can react to a failed
+    // cancel; a simple alert is enough here since this is a rare path.
     dispatch(cancelBooking(bookingId)).unwrap().catch((message) => {
       alert(message || 'Could not cancel booking.');
     });

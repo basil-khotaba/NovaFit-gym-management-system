@@ -6,7 +6,12 @@ import ErrorMessage from '../components/ErrorMessage';
 
 const CATEGORIES = ['All', 'Strength', 'Cardio', 'Yoga', 'HIIT'];
 
+// Shared fetch helper — takes the state setters as params so it can be
+// called both from the mount effect and from the category/retry handlers
+// without duplicating the request + .then/.catch/.finally chain.
 function doFetch(category, setClasses, setError, setLoading) {
+  // 'All' means "no category filter" — omit the query param entirely
+  // rather than sending category=All, which the backend wouldn't understand.
   const params = category && category !== 'All' ? { category } : {};
   api
     .get('/classes', { params })
@@ -17,6 +22,9 @@ function doFetch(category, setClasses, setError, setLoading) {
     .finally(() => setLoading(false));
 }
 
+/**
+ * Classes — browsable, filterable list of all gym classes.
+ */
 function Classes() {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);

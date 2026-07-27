@@ -15,6 +15,14 @@ const EMPTY_FORM = {
   trainer: '',
 };
 
+/**
+ * ClassForm — admin page for creating or editing a gym class.
+ *
+ * One component handles both modes: isEdit is derived from whether a
+ * route param (:id) is present. /admin/classes/new has no id → create
+ * mode; /admin/classes/:id/edit has one → edit mode, which pre-fills
+ * the form from the existing class.
+ */
 function ClassForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -22,6 +30,8 @@ function ClassForm() {
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [trainers, setTrainers] = useState([]);
+  // Only show the loading spinner in edit mode — create mode has nothing
+  // to fetch before the form is usable (trainers list loads in the background).
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -30,6 +40,8 @@ function ClassForm() {
     api.get('/trainers').then((res) => {
       const list = res.data.data;
       setTrainers(list);
+      // In create mode, default the trainer dropdown to the first option
+      // rather than leaving it blank/unselected.
       if (!isEdit && list.length > 0) {
         setForm((prev) => ({ ...prev, trainer: list[0]._id }));
       }
@@ -40,6 +52,9 @@ function ClassForm() {
         .get(`/classes/${id}`)
         .then((res) => {
           const c = res.data.data;
+          // Map the fetched class onto the form shape. trainer may come
+          // back populated (an object with _id) or as a raw id string,
+          // depending on the endpoint — handle both.
           setForm({
             name: c.name,
             description: c.description || '',
@@ -65,6 +80,7 @@ function ClassForm() {
     setError(null);
     setSubmitting(true);
     try {
+      // Same form data, different verb/endpoint depending on the mode.
       if (isEdit) {
         await api.put(`/classes/${id}`, form);
       } else {

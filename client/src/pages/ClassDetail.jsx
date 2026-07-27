@@ -7,6 +7,14 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * ClassDetail — single class page with trainer info and a book button.
+ *
+ * Booking dispatches a Redux thunk (createBooking) rather than calling
+ * the API directly, because a successful booking here needs to be
+ * reflected on the MyBookings page too — the shared bookings slice keeps
+ * both in sync without either page re-fetching from the server.
+ */
 function ClassDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -17,6 +25,7 @@ function ClassDetail() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingMsg, setBookingMsg] = useState(null);
 
+  // Images are served from the API's origin, not the '/api' path.
   const API_ORIGIN = (import.meta.env.VITE_API_URL || '').replace('/api', '');
 
   // loading starts true; setState only inside async callbacks.
@@ -34,6 +43,9 @@ function ClassDetail() {
     setBookingLoading(true);
     setBookingMsg(null);
     try {
+      // .unwrap() turns the thunk's rejected action into a thrown value,
+      // so the try/catch here can handle it like a normal async error
+      // instead of having to check action.meta.requestStatus manually.
       await dispatch(createBooking(id)).unwrap();
       setBookingMsg({ type: 'success', text: 'Class booked! Check My Bookings.' });
     } catch (message) {

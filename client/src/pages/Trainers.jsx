@@ -3,8 +3,11 @@ import api from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 
+// Images are served from the API's origin, not the '/api' path.
 const API_ORIGIN = (import.meta.env.VITE_API_URL || '').replace('/api', '');
 
+// Presentational card for a single trainer — kept local since it's only
+// used within this page.
 function TrainerCard({ trainer }) {
   return (
     <div className="trainer-card">
@@ -41,6 +44,9 @@ function TrainerCard({ trainer }) {
   );
 }
 
+/**
+ * Trainers — public page listing all gym trainers.
+ */
 function Trainers() {
   const [trainers, setTrainers] = useState([]);
   const [loading, setLoading] = useState(true);

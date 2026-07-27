@@ -4,6 +4,14 @@ import { useForm } from 'react-hook-form';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * Register — sign-up page.
+ *
+ * Uses react-hook-form for validation (mode: 'onBlur'), same pattern as
+ * Login. confirmPassword is a form-only field validated against the
+ * password field via getValues — it is deliberately NOT sent to the
+ * server (see onSubmit below), since the backend only needs one password.
+ */
 function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -19,11 +27,14 @@ function Register() {
   const onSubmit = async (data) => {
     setServerError(null);
     try {
+      // Only send the fields the backend expects — confirmPassword is
+      // stripped out here since it was only for client-side validation.
       const res = await api.post('/auth/register', {
         name: data.name,
         email: data.email,
         password: data.password,
       });
+      // Registering logs the user in immediately — no separate login step.
       login(res.data.user, res.data.token);
       navigate('/');
     } catch (err) {
@@ -98,6 +109,8 @@ function Register() {
               autoComplete="new-password"
               {...register('confirmPassword', {
                 required: 'Please confirm your password',
+                // getValues reads the current 'password' field's value at
+                // validation time, so this stays in sync as the user types.
                 validate: (value) =>
                   value === getValues('password') || 'Passwords do not match',
               })}

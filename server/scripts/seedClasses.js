@@ -3,9 +3,16 @@ const mongoose = require('mongoose');
 const Trainer = require('../models/Trainer');
 const Class = require('../models/Class');
 
+/**
+ * One-off seed script: creates the demo class schedule and assigns
+ * each class to its trainer. Requires seedTrainers.js to have been
+ * run first, since it looks trainers up by name.
+ * Run manually with: node scripts/seedClasses.js
+ */
 async function seed() {
   await mongoose.connect(process.env.MONGO_URI);
 
+  // Look up trainers by name so classes can be linked to their _id.
   const [alex, maya, jordan, sofia, marcus, lena, dani] = await Promise.all([
     Trainer.findOne({ name: 'Alex Carter' }),
     Trainer.findOne({ name: 'Maya Patel' }),

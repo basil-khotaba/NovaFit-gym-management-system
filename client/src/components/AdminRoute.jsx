@@ -8,6 +8,9 @@ import { useAuth } from '../context/AuthContext';
 function AdminRoute({ children }) {
   const { user, loading } = useAuth();
 
+  // While AuthContext is still verifying a stored token, render nothing
+  // rather than redirecting — redirecting here would briefly bounce a
+  // logged-in admin to "/" before their session finishes loading.
   if (loading) return null;
 
   // Not logged in, or logged in but not an admin → send home.

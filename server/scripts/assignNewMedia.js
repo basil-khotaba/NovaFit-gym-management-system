@@ -3,6 +3,12 @@ const mongoose = require('mongoose');
 const Trainer = require('../models/Trainer');
 const Class = require('../models/Class');
 
+/**
+ * One-off maintenance script: assigns newly-added image/photo files
+ * (already uploaded to /uploads) to the classes and trainer that
+ * were seeded without media. Matches records by name.
+ * Run manually with: node scripts/assignNewMedia.js
+ */
 async function run() {
   await mongoose.connect(process.env.MONGO_URI);
 

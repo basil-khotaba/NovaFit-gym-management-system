@@ -1,11 +1,16 @@
 const Joi = require('joi');
 
+/**
+ * JOI validation schemas for membership plan requests.
+ */
+
 // Max classes a member on this plan can book per month. null = unlimited.
 const classLimitSchema = Joi.number().integer().min(1).allow(null).messages({
   'number.base': 'Class limit must be a number',
   'number.min': 'Class limit must be at least 1',
 });
 
+// Rules for POST /api/plans - name and price are required to create a plan.
 const createPlanSchema = Joi.object({
   name: Joi.string().min(2).max(50).required().messages({
     'string.empty': 'Plan name is required',
@@ -20,6 +25,7 @@ const createPlanSchema = Joi.object({
   classLimit: classLimitSchema.optional(),
 });
 
+// Rules for PUT/PATCH /api/plans/:id - all fields optional, but at least one required.
 const updatePlanSchema = Joi.object({
   name: Joi.string().min(2).max(50),
   price: Joi.number().min(0),

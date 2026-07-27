@@ -56,6 +56,8 @@ const initialState = {
   items: [],
   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
   error: null,
+  // Tracks which single booking's cancel request is in flight, so the
+  // UI can disable/label just that one row's button instead of every row.
   cancellingId: null,
 };
 

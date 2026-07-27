@@ -9,7 +9,9 @@ function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // While checking the token on app load, show nothing yet.
+  // While checking the token on app load, show nothing yet — redirecting
+  // now would briefly bounce a logged-in user to /login before their
+  // session finishes loading.
   if (loading) return null;
 
   // Not logged in → send to login, remembering where they wanted to go.

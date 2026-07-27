@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
 
+/**
+ * NotFound — catch-all 404 page for any route that doesn't match
+ * one defined in App.jsx.
+ */
 function NotFound() {
   return (
     <div className="notfound-page">

@@ -1,3 +1,7 @@
+/**
+ * Application entry point. Wires together the Express app (app.js)
+ * and the MongoDB connection, then starts listening for requests.
+ */
 const app = require('./app');
 const connectDB = require('./config/db');
 

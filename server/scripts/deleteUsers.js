@@ -3,6 +3,11 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Membership = require('../models/Membership');
 
+/**
+ * One-off cleanup script: permanently deletes the hard-coded list of
+ * test/demo user accounts below along with their memberships.
+ * Run manually with: node scripts/deleteUsers.js
+ */
 async function run() {
   await mongoose.connect(process.env.MONGO_URI);
   const emails = ['moste@gmail.com', 'ahmad@gmail.com', 'karam@gmail.com', 'jobran@gmail.com'];

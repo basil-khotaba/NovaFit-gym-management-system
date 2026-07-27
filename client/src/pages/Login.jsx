@@ -4,6 +4,15 @@ import { useForm } from 'react-hook-form';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * Login — sign-in page.
+ *
+ * Client-side validation is handled by react-hook-form (mode: 'onBlur'
+ * so errors appear after a field loses focus, not on every keystroke).
+ * Server-side errors (wrong email/password) are separate state, shown
+ * above the form, since react-hook-form only knows about field-level
+ * validation and has no idea the request failed.
+ */
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -15,10 +24,13 @@ function Login() {
     formState: { errors, isSubmitting },
   } = useForm({ mode: 'onBlur' });
 
+  // handleSubmit only calls this once client-side validation passes.
   const onSubmit = async (data) => {
     setServerError(null);
     try {
       const res = await api.post('/auth/login', data);
+      // Logging in immediately stores the token and user in AuthContext,
+      // so the Navbar/routes update without a page reload.
       login(res.data.user, res.data.token);
       navigate('/');
     } catch (err) {

@@ -2,6 +2,11 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Plan = require('../models/Plan');
 
+/**
+ * One-off seed script: creates the three membership plans (Starter,
+ * Premium, Elite) or updates them in place if they already exist.
+ * Run manually with: node scripts/seedPlans.js
+ */
 const plans = [
   {
     name: 'Starter',
@@ -32,6 +37,7 @@ async function seed() {
   for (const data of plans) {
     const existing = await Plan.findOne({ name: data.name });
     if (existing) {
+      // Plan already exists - overwrite its fields instead of duplicating it.
       await Plan.findByIdAndUpdate(existing._id, data);
       console.log(`Updated: ${data.name} → classLimit: ${data.classLimit ?? 'unlimited'}`);
     } else {

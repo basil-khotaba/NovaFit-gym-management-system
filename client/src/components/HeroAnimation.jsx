@@ -1,3 +1,10 @@
+/**
+ * HeroAnimation — decorative inline SVG for the Home page hero section.
+ *
+ * A simple figure lifting a dumbbell, animated with plain CSS keyframes
+ * (defined in the embedded <style>) rather than a JS animation library —
+ * there's no interactivity needed, so CSS keeps this dependency-free.
+ */
 function HeroAnimation() {
   return (
     <svg
@@ -8,6 +15,9 @@ function HeroAnimation() {
       style={{ filter: 'drop-shadow(0 0 22px rgba(224, 32, 32, 0.4))' }}
     >
       <defs>
+        {/* transform-box: fill-box lets rotation/translation pivot around
+            the shape's own bounding box instead of the SVG's origin —
+            without it, "curl" would rotate around the wrong point. */}
         <style>{`
           @keyframes curlUp {
             0%   { transform: rotate(0deg); }
@@ -53,7 +63,8 @@ function HeroAnimation() {
       {/* Right upper arm */}
       <rect x="130" y="69" width="22" height="56" rx="10" fill="#c41818"/>
 
-      {/* Right forearm + dumbbell (animated) */}
+      {/* Right forearm + dumbbell — grouped so the "curl-arm" animation
+          class rotates the whole arm+weight together as one unit */}
       <g className="curl-arm">
         <rect x="132" y="123" width="19" height="48" rx="9" fill="#aa1515"/>
         <rect x="118" y="167" width="48" height="11" rx="5" fill="#222" stroke="#555" strokeWidth="1.5"/>

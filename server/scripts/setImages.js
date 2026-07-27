@@ -1,6 +1,12 @@
 require('dotenv').config({ path: __dirname + '/../.env' });
 const mongoose = require('mongoose');
 
+/**
+ * One-off maintenance script: sets photo/image paths on an older set
+ * of trainers and classes by name, using the raw collections directly
+ * (bypasses Mongoose models/validation since this is a quick data fix).
+ * Run manually with: node scripts/setImages.js
+ */
 mongoose.connect(process.env.MONGO_URI).then(async () => {
   const db = mongoose.connection.db;
 

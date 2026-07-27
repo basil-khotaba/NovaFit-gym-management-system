@@ -4,6 +4,13 @@ import api from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 
+/**
+ * AdminDashboard — admin-only overview: stats, a classes table (with
+ * edit/delete), and a recent-bookings table.
+ *
+ * Uses plain useState/useEffect (not Redux) since this data is only
+ * ever read and used on this one page — there's nothing to share.
+ */
 function AdminDashboard() {
   const [classes, setClasses] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -59,6 +66,8 @@ function AdminDashboard() {
     setDeletingId(classId);
     try {
       await api.delete(`/classes/${classId}`);
+      // Remove it from local state directly instead of re-fetching the
+      // whole list — avoids an extra round trip for a one-item change.
       setClasses((prev) => prev.filter((c) => c._id !== classId));
     } catch (err) {
       alert(err.response?.data?.message || 'Could not delete class.');
@@ -75,6 +84,7 @@ function AdminDashboard() {
       </div>
     );
 
+  // Only confirmed bookings count toward the "Active bookings" stat card.
   const activeBookings = bookings.filter((b) => b.status === 'confirmed');
 
   return (
@@ -168,7 +178,8 @@ function AdminDashboard() {
         )}
       </section>
 
-      {/* Recent bookings table */}
+      {/* Recent bookings table — capped at 20 rows; this is a dashboard
+          preview, not a full paginated bookings admin view */}
       <section style={{ marginTop: '40px' }}>
         <div className="section-header">
           <h2 className="section-title">Recent Bookings</h2>

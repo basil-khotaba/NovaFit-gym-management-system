@@ -4,6 +4,12 @@ const User = require('../models/User');
 const Plan = require('../models/Plan');
 const Membership = require('../models/Membership');
 
+/**
+ * One-off seed script: creates a fixed set of demo member accounts
+ * (with pre-hashed passwords carried over from another database) and
+ * gives each one an active Starter membership.
+ * Run manually with: node scripts/seedUsers.js
+ */
 async function seed() {
   await mongoose.connect(process.env.MONGO_URI);
 

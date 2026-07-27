@@ -2,6 +2,11 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Trainer = require('../models/Trainer');
 
+/**
+ * One-off seed script: creates the demo trainer roster used by the
+ * app if a trainer with the same name does not already exist.
+ * Run manually with: node scripts/seedTrainers.js
+ */
 const trainers = [
   {
     name: 'Alex Carter',

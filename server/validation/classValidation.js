@@ -1,10 +1,16 @@
 const Joi = require('joi');
 
+/**
+ * JOI validation schemas for class requests.
+ */
+
+// MongoDB ObjectId used to reference the trainer assigned to a class.
 const objectId = Joi.string().hex().length(24).messages({
   'string.hex': 'Trainer id must be a valid id',
   'string.length': 'Trainer id must be a valid id',
 });
 
+// Rules for POST /api/classes - all fields required to create a new class.
 const createClassSchema = Joi.object({
   name: Joi.string().min(2).max(100).required().messages({
     'string.empty': 'Class name is required',
@@ -36,6 +42,7 @@ const createClassSchema = Joi.object({
   }),
 });
 
+// Rules for PUT/PATCH /api/classes/:id - all fields optional, but at least one required.
 const updateClassSchema = Joi.object({
   name: Joi.string().min(2).max(100),
   description: Joi.string().max(500).allow(''),

@@ -5,6 +5,10 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import { useAuth } from '../context/AuthContext';
 
+// Presentational card for one plan. Rendering differs by state: logged-out
+// visitors see a "Get started" link to /login; logged-in users see an
+// actionable button that is disabled while a selection is in flight or if
+// this is already their current plan.
 function PlanCard({ plan, onSelect, selecting, isLoggedIn, isCurrent }) {
   const featured = plan.featured;
 
@@ -47,6 +51,9 @@ function PlanCard({ plan, onSelect, selecting, isLoggedIn, isCurrent }) {
   );
 }
 
+/**
+ * Memberships — public pricing page; logged-in users can select/switch plans.
+ */
 function Memberships() {
   const { user, updateUser } = useAuth();
   const [plans, setPlans] = useState([]);
@@ -56,7 +63,9 @@ function Memberships() {
   const [successMsg, setSuccessMsg] = useState(null);
   const [planError, setPlanError] = useState(null);
 
-  // The plan the user currently has — comes from user.membership.plan._id
+  // The plan the user currently has — comes from user.membership.plan._id.
+  // membership.plan may be populated (object) or just an id (string),
+  // depending on how the user object was last fetched, so try both.
   const currentPlanId = user?.membership?.plan?._id?.toString()
     ?? user?.membership?.plan?.toString()
     ?? null;
@@ -90,7 +99,9 @@ function Memberships() {
     api
       .patch('/auth/me/plan', { plan: planId })
       .then((res) => {
-        // Update the user in context so the current-plan highlight updates immediately
+        // Update the user in context (not just local state) so the
+        // current-plan highlight and Navbar badge update immediately,
+        // without requiring a page reload or re-fetch of the user.
         updateUser({ ...user, membership: res.data.data });
         setSuccessMsg(`Your membership plan has been changed to ${planName}!`);
       })
