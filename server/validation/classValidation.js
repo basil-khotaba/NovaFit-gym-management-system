@@ -44,6 +44,7 @@ const updateClassSchema = Joi.object({
   schedule: Joi.string(),
   capacity: Joi.number().integer().min(1),
   trainer: objectId,
+  image: Joi.string().allow(''),
 })
   .min(1)
   .messages({ 'object.min': 'Provide at least one field to update' });

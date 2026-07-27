@@ -13,6 +13,7 @@ const createTrainerSchema = Joi.object({
     'number.min': 'Rating cannot be below 0',
     'number.max': 'Rating cannot be above 5',
   }),
+  photo: Joi.string().allow('').optional(),
 });
 
 const updateTrainerSchema = Joi.object({
@@ -20,6 +21,7 @@ const updateTrainerSchema = Joi.object({
   bio: Joi.string().max(500).allow(''),
   specialties: Joi.array().items(Joi.string()),
   rating: Joi.number().min(0).max(5),
+  photo: Joi.string().allow(''),
 })
   .min(1)
   .messages({ 'object.min': 'Provide at least one field to update' });

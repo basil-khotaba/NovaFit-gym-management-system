@@ -24,7 +24,7 @@ async function seed() {
       durationMinutes: 60,
       schedule: 'Mon & Wed 7:00am',
       capacity: 12,
-      image: 'uploads/class-powerlifting.png',
+      image: '/uploads/class-powerlifting.png',
       trainer: alex._id,
     },
     {
@@ -34,7 +34,7 @@ async function seed() {
       durationMinutes: 60,
       schedule: 'Tue & Thu 6:00am',
       capacity: 10,
-      image: 'uploads/class-olympic-lifting.png',
+      image: '/uploads/class-olympic-lifting.png',
       trainer: alex._id,
     },
     {
@@ -44,7 +44,7 @@ async function seed() {
       durationMinutes: 45,
       schedule: 'Mon, Wed & Fri 6:00pm',
       capacity: 20,
-      image: 'uploads/class-hiit-circuit.png',
+      image: '/uploads/class-hiit-circuit.png',
       trainer: maya._id,
     },
     {
@@ -54,7 +54,7 @@ async function seed() {
       durationMinutes: 45,
       schedule: 'Tue & Sat 9:00am',
       capacity: 15,
-      image: 'uploads/class-metabolic.png',
+      image: '/uploads/class-metabolic.png',
       trainer: maya._id,
     },
     {
@@ -64,7 +64,7 @@ async function seed() {
       durationMinutes: 50,
       schedule: 'Mon, Wed & Fri 7:00am',
       capacity: 25,
-      image: 'uploads/class-cardio-burn.png',
+      image: '/uploads/class-cardio-burn.png',
       trainer: jordan._id,
     },
     {
@@ -74,7 +74,7 @@ async function seed() {
       durationMinutes: 40,
       schedule: 'Tue & Thu 7:30am',
       capacity: 20,
-      image: 'uploads/class-endurance-run.png',
+      image: '/uploads/class-endurance-run.png',
       trainer: jordan._id,
     },
     {
@@ -84,7 +84,7 @@ async function seed() {
       durationMinutes: 60,
       schedule: 'Mon, Wed & Fri 8:00am',
       capacity: 18,
-      image: 'uploads/class-vinyasa-flow.png',
+      image: '/uploads/class-vinyasa-flow.png',
       trainer: sofia._id,
     },
     {
@@ -94,7 +94,7 @@ async function seed() {
       durationMinutes: 75,
       schedule: 'Sun 10:00am',
       capacity: 18,
-      image: 'uploads/class-yin-restore.png',
+      image: '/uploads/class-yin-restore.png',
       trainer: sofia._id,
     },
     {
