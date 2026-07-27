@@ -29,6 +29,12 @@ const reviewRoutes = require('./routes/reviewRoutes');
 
 const app = express();
 
+// Render (like Heroku, Vercel, etc.) puts the app behind one reverse
+// proxy hop, which sets X-Forwarded-For to the real client IP. Without
+// this, Express's req.ip is the proxy's own IP for every request, and
+// express-rate-limit refuses to run (it can't tell users apart by IP).
+app.set('trust proxy', 1);
+
 /* ------------------------------------------------------------------ *
  * Global middleware
  * ------------------------------------------------------------------ */
