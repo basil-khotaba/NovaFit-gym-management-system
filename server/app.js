@@ -38,10 +38,24 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // Allow the React frontend to call this API.
 // In development, accept any localhost port so Vite's auto-port works.
+//
+// CLIENT_URL is sanitized before use: it gets echoed back verbatim as
+// the Access-Control-Allow-Origin header, so a stray invisible
+// character from copy-pasting (zero-width space, a bidi mark, a
+// trailing newline) makes Node throw "Invalid character in header
+// content" on every single request.
+const sanitizeUrl = (value) => {
+  var invisiblePattern = String.fromCharCode(0x200B, 0x200C, 0x200D, 0x200E, 0x200F, 0x202A, 0x202B, 0x202C, 0x202D, 0x202E, 0xFEFF);
+  var controlPattern = String.fromCharCode(13, 10, 9);
+  var invisibleRegex = new RegExp("[" + invisiblePattern + "]", "g");
+  var controlRegex = new RegExp("[" + controlPattern + "]", "g");
+  return (value || "").replace(invisibleRegex, "").replace(controlRegex, "").trim();
+};
+
 const corsOrigin =
   process.env.NODE_ENV === 'development'
     ? /^http:\/\/localhost(:\d+)?$/
-    : process.env.CLIENT_URL;
+    : sanitizeUrl(process.env.CLIENT_URL);
 
 app.use(
   cors({
@@ -71,7 +85,7 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'NovaFit API is running' });
 });
 
-// Public stats — member count, trainer count, class count.
+// Public stats - member count, trainer count, class count.
 app.get('/api/stats', async (req, res) => {
   try {
     const User    = require('./models/User');
