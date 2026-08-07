@@ -18,6 +18,7 @@ const Memberships = lazy(() => import('./pages/Memberships'));
 const MyBookings = lazy(() => import('./pages/MyBookings'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ClassForm = lazy(() => import('./pages/ClassForm'));
+const TrainerForm = lazy(() => import('./pages/TrainerForm'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 /**
@@ -75,6 +76,22 @@ function App() {
             element={
               <AdminRoute>
                 <ClassForm />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/trainers/new"
+            element={
+              <AdminRoute>
+                <TrainerForm />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/trainers/:id/edit"
+            element={
+              <AdminRoute>
+                <TrainerForm />
               </AdminRoute>
             }
           />

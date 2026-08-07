@@ -18,7 +18,8 @@ function AdminDashboard() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
+  const [deletingClassId, setDeletingClassId] = useState(null);
+  const [deletingTrainerId, setDeletingTrainerId] = useState(null);
 
   // loading starts true; setState only inside async callbacks.
   useEffect(() => {
@@ -61,9 +62,9 @@ function AdminDashboard() {
       .finally(() => setLoading(false));
   };
 
-  const handleDelete = async (classId) => {
+  const handleDeleteClass = async (classId) => {
     if (!window.confirm('Delete this class? This cannot be undone.')) return;
-    setDeletingId(classId);
+    setDeletingClassId(classId);
     try {
       await api.delete(`/classes/${classId}`);
       // Remove it from local state directly instead of re-fetching the
@@ -72,7 +73,20 @@ function AdminDashboard() {
     } catch (err) {
       alert(err.response?.data?.message || 'Could not delete class.');
     } finally {
-      setDeletingId(null);
+      setDeletingClassId(null);
+    }
+  };
+
+  const handleDeleteTrainer = async (trainerId) => {
+    if (!window.confirm('Delete this trainer? This cannot be undone.')) return;
+    setDeletingTrainerId(trainerId);
+    try {
+      await api.delete(`/trainers/${trainerId}`);
+      setTrainers((prev) => prev.filter((t) => t._id !== trainerId));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Could not delete trainer.');
+    } finally {
+      setDeletingTrainerId(null);
     }
   };
 
@@ -91,13 +105,22 @@ function AdminDashboard() {
     <div className="page">
       <div className="page-header">
         <h1 className="page-title">Admin Dashboard</h1>
-        <Link
-          to="/admin/classes/new"
-          className="btn-primary"
-          style={{ padding: '8px 18px', flexShrink: 0 }}
-        >
-          + New class
-        </Link>
+        <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
+          <Link
+            to="/admin/trainers/new"
+            className="btn-primary"
+            style={{ padding: '8px 18px' }}
+          >
+            + New trainer
+          </Link>
+          <Link
+            to="/admin/classes/new"
+            className="btn-primary"
+            style={{ padding: '8px 18px' }}
+          >
+            + New class
+          </Link>
+        </div>
       </div>
 
       {/* Stats row */}
@@ -164,10 +187,58 @@ function AdminDashboard() {
                       </Link>
                       <button
                         className="btn-delete"
-                        onClick={() => handleDelete(c._id)}
-                        disabled={deletingId === c._id}
+                        onClick={() => handleDeleteClass(c._id)}
+                        disabled={deletingClassId === c._id}
                       >
-                        {deletingId === c._id ? '...' : 'Delete'}
+                        {deletingClassId === c._id ? '...' : 'Delete'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Trainers table */}
+      <section style={{ marginTop: '40px' }}>
+        <div className="section-header">
+          <h2 className="section-title">Trainers</h2>
+        </div>
+        {trainers.length === 0 ? (
+          <p style={{ color: 'var(--text-dim)' }}>No trainers yet.</p>
+        ) : (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Specialties</th>
+                  <th>Rating</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {trainers.map((t) => (
+                  <tr key={t._id}>
+                    <td>{t.name}</td>
+                    <td>{t.specialties?.join(', ') || '—'}</td>
+                    <td>{t.rating != null ? Number(t.rating).toFixed(1) : '—'}</td>
+                    <td className="table-actions">
+                      <Link
+                        to={`/admin/trainers/${t._id}/edit`}
+                        className="btn-ghost"
+                        style={{ fontSize: '12px', padding: '4px 12px' }}
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDeleteTrainer(t._id)}
+                        disabled={deletingTrainerId === t._id}
+                      >
+                        {deletingTrainerId === t._id ? '...' : 'Delete'}
                       </button>
                     </td>
                   </tr>

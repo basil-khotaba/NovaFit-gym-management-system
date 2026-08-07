@@ -3,6 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+// Images are served from the API's origin, not the '/api' path.
+const API_ORIGIN = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+
 const CATEGORIES = ['Strength', 'Cardio', 'Yoga', 'HIIT'];
 
 const EMPTY_FORM = {
@@ -30,6 +33,9 @@ function ClassForm() {
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [trainers, setTrainers] = useState([]);
+  const [existingImage, setExistingImage] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
   // Only show the loading spinner in edit mode — create mode has nothing
   // to fetch before the form is usable (trainers list loads in the background).
   const [loading, setLoading] = useState(isEdit);
@@ -52,7 +58,7 @@ function ClassForm() {
         .get(`/classes/${id}`)
         .then((res) => {
           const c = res.data.data;
-          // Map the fetched class onto the form shape. trainer may come
+          // Map the fetched class into the form shape. trainer may come
           // back populated (an object with _id) or as a raw id string,
           // depending on the endpoint — handle both.
           setForm({
@@ -64,15 +70,31 @@ function ClassForm() {
             capacity: c.capacity,
             trainer: c.trainer?._id || c.trainer || '',
           });
+          setExistingImage(c.image || '');
         })
         .catch(() => setError('Could not load class data.'))
         .finally(() => setLoading(false));
     }
   }, [id, isEdit]);
 
+  // Revoke the local preview URL when it changes or the component
+  // unmounts, so we don't leak object URLs.
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
@@ -81,11 +103,22 @@ function ClassForm() {
     setSubmitting(true);
     try {
       // Same form data, different verb/endpoint depending on the mode.
+      let classId = id;
       if (isEdit) {
         await api.put(`/classes/${id}`, form);
       } else {
-        await api.post('/classes', form);
+        const res = await api.post('/classes', form);
+        classId = res.data.data._id;
       }
+
+      // Image upload is a separate multipart request against the
+      // class id we now have (existing or newly created).
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        await api.patch(`/classes/${classId}/image`, formData);
+      }
+
       navigate('/admin');
     } catch (err) {
       setError(err.response?.data?.message || 'Could not save class.');
@@ -168,6 +201,30 @@ function ClassForm() {
               required
             />
           </div>
+        </div>
+
+        <div className="form-group">
+          <label>Image</label>
+          {(imagePreview || existingImage) && (
+            <img
+              src={imagePreview || `${API_ORIGIN}${existingImage}`}
+              alt="Class preview"
+              style={{
+                width: '160px',
+                height: '100px',
+                objectFit: 'cover',
+                borderRadius: '8px',
+                marginBottom: '10px',
+                display: 'block',
+              }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          )}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleImageChange}
+          />
         </div>
 
         <div className="form-row">
