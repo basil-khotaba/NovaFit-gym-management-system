@@ -24,8 +24,9 @@ async function run() {
   let user = await User.findOne({ email: EMAIL });
   if (user) {
     user.role = 'admin';
+    user.password = PASSWORD;
     await user.save();
-    console.log(`Promoted existing user to admin: ${EMAIL}`);
+    console.log(`Promoted existing user to admin and reset password: ${EMAIL}`);
   } else {
     user = await User.create({
       name: NAME,
