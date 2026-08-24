@@ -86,6 +86,16 @@ app.use('/api', apiLimiter);
  * Routes
  * ------------------------------------------------------------------ */
 
+// Root route - this is an API-only server with no homepage, so point
+// visitors who land here directly (e.g. by opening the Render URL in
+// a browser) at somewhere useful instead of a bare 404.
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'NovaFit API is running. See /api/health for a status check.',
+  });
+});
+
 // Simple health-check route - confirms the server is alive.
 app.get('/api/health', (req, res) => {
   res.status(200).json({ success: true, message: 'NovaFit API is running' });
