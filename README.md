@@ -117,5 +117,5 @@ npm test
 
 After both are live, put the two URLs here for submission:
 
-- Client: `TODO — paste your Vercel URL`
-- Server: `TODO — paste your Render URL`
+- Client: https://nova-fit-gym-management-system-novafit.vercel.app
+- Server: https://novafit-gym-management-system.onrender.com
